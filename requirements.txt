@@ -1,0 +1,12 @@
+selenium>=4.10.0
+webdriver-manager>=4.0.0
+python-dotenv>=1.0.0
+pyautogui
+flask
+flask_cors
+openai
+google-generativeai
+undetected-chromedriver
+pytesseract
+Pillow
+requests
