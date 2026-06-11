@@ -96,6 +96,12 @@ def process_job_page(driver):
             buffer(click_gap)
             
             # Now we might be in a modal or new page. Attempt to answer questions.
+            # Switch to new tab if Apply opened one
+            for handle in driver.window_handles:
+                if handle != driver.current_window_handle and handle != driver.window_handles[0]: # Assuming original is 0
+                    driver.switch_to.window(handle)
+                    break
+
             answer_questions(driver)
             
             # Try to submit
@@ -200,16 +206,22 @@ def apply_to_jobs(driver, max_pages, applied_jobs_file):
                             save_company_website_job("company_website_jobs.csv", job_id, job_title, company, job_url)
                             saved_company_urls.add(job_url)
                     
-                    # Close the tab and switch back
-                    driver.close()
+                    # Close all tabs except the original window and switch back
+                    for handle in driver.window_handles:
+                        if handle != original_window:
+                            driver.switch_to.window(handle)
+                            driver.close()
                     driver.switch_to.window(original_window)
                     buffer(1)
                     
                 except Exception as e:
                     print_lg(f"Error processing job card {idx+1}: {e}")
-                    if len(driver.window_handles) > 1:
-                        driver.close()
-                        driver.switch_to.window(original_window)
+                    # Ensure we clean up any extra tabs
+                    for handle in driver.window_handles:
+                        if handle != original_window:
+                            driver.switch_to.window(handle)
+                            driver.close()
+                    driver.switch_to.window(original_window)
                     
         except Exception as e:
             print_lg(f"Error reading job cards on page {page}: {e}")
